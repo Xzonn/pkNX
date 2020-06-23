@@ -302,6 +302,7 @@ namespace pkNX.WinForms
 
         public void DumpNestEntries()
         {
+            var pt = ROM.Data.PersonalData;
             var speciesNames = ROM.GetStrings(TextName.SpeciesNames);
             var itemNames = ROM.GetStrings(TextName.ItemNames);
             var moveNames = ROM.GetStrings(TextName.MoveNames);
@@ -335,11 +336,12 @@ namespace pkNX.WinForms
             File.WriteAllLines(GetPath("nestCommon.txt"), common);
             File.WriteAllLines(GetPath("nestSword.txt"), sword);
             File.WriteAllLines(GetPath("nestShield.txt"), shield);
+            var Types = ROM.GetStrings(TextName.Types);
 
             var nest_pretty_sw = nest_encounts.Tables.Where(z => z.GameVersion == 1).SelectMany((z, x) =>
-                z.GetPrettySummary(speciesNames, itemNames, moveNames, Legal.TMHM_SWSH, nest_drops.Tables, nest_bonus.Tables, x));
+                z.GetPrettySummary(speciesNames, itemNames, moveNames, Legal.TMHM_SWSH, nest_drops.Tables, nest_bonus.Tables, x, pt, Types));
             var nest_pretty_sh = nest_encounts.Tables.Where(z => z.GameVersion == 2).SelectMany((z, x) =>
-                z.GetPrettySummary(speciesNames, itemNames, moveNames, Legal.TMHM_SWSH, nest_drops.Tables, nest_bonus.Tables, x));
+                z.GetPrettySummary(speciesNames, itemNames, moveNames, Legal.TMHM_SWSH, nest_drops.Tables, nest_bonus.Tables, x, pt, Types));
             File.WriteAllLines(GetPath("nestPrettySword.txt"), nest_pretty_sw);
             File.WriteAllLines(GetPath("nestPrettyShield.txt"), nest_pretty_sh);
         }
