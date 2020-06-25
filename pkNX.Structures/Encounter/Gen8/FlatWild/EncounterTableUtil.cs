@@ -9,19 +9,25 @@ namespace pkNX.Structures
     {
         public static byte[][] GetBytes(IReadOnlyDictionary<ulong, byte> zone_loc, EncounterArchive8 t)
         {
-            var result = new byte[t.EncounterTables.Length][];
-            for (int i = 0; i < result.Length; i++)
+            var result = new List<byte[]>();
+            for (int i = 0; i < t.EncounterTables.Length; i++)
             {
                 var zone = t.EncounterTables[i];
-                result[i] = GetZoneBytes(zone, zone_loc);
+                var entry = GetZoneBytes(zone, zone_loc);
+                if (entry.Length != 0)
+                    result.Add(entry);
             }
 
-            return result;
+            return result.ToArray();
         }
 
         private static byte[] GetZoneBytes(EncounterTable8 zone, IReadOnlyDictionary<ulong, byte> zoneLoc)
         {
-            byte locID = zoneLoc.TryGetValue(zone.ZoneID, out var tmp) ? tmp : (byte)2; // mystery zone
+            // Don't dump data that we can't correlate to a zone
+            if (!zoneLoc.TryGetValue(zone.ZoneID, out var tmp))
+                return new byte[] { };
+
+            byte locID = tmp;
             var list = new List<Slot8>();
             for (int i = 0; i < zone.SubTables.Length; i++)
             {

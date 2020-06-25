@@ -169,7 +169,10 @@ namespace pkNX.WinForms
 
         private static void GetQuickFiller(PictureBox pb, TrainerPoke pk)
         {
-            pb.Image = SpriteUtil.GetSprite(pk.Species, pk.Form, pk.Gender, pk.HeldItem, false, pk.Shiny);
+            if (pk is TrainerPoke8 c)
+                pb.Image = SpriteUtil.GetSprite(c.Species, c.Form, c.Gender, c.HeldItem, false, c.Shiny, c.CanGigantamax);
+            else
+                pb.Image = SpriteUtil.GetSprite(pk.Species, pk.Form, pk.Gender, pk.HeldItem, false, pk.Shiny, false);
         }
 
         // Top Level Functions
@@ -390,6 +393,14 @@ namespace pkNX.WinForms
 
         private void PopulateFieldsTrainer(TrainerData tr)
         {
+            // some trainers have trclasses without corresponding trnames in the text, so add them
+            if (Game.Info.SWSH)
+            {
+                var classes = CB_Trainer_Class.Items;
+                for (int i = classes.Count; i <= 253; i++)
+                    classes.Add($"{trClass[1]} - {i} *");
+            }
+
             // Load Trainer Data
             CB_Trainer_Class.SelectedIndex = tr.Class;
             CB_Item_1.SelectedIndex = tr.Item1;
@@ -470,6 +481,9 @@ namespace pkNX.WinForms
             var name = Trainer.Name;
             var team = Trainer.Team;
             var sb = new StringBuilder();
+            if (tr.Class > trClass.Length) // Klara and Avery out of bounds trclass edge case
+                tr.Class = 1;
+
             sb.AppendLine("======");
             sb.Append(file).Append(" - ").Append(trClass[tr.Class]).Append(" ").AppendLine(name);
             sb.AppendLine("======");

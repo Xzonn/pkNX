@@ -114,6 +114,25 @@ namespace pkNX.WinForms
                 }
             }
 
+            var paks = Directory.EnumerateFiles(ROM.PathRomFS, "*", SearchOption.AllDirectories)
+                .Where(z => Path.GetExtension(z) == ".gfpak");
+            foreach (var f in paks)
+            {
+                var pak = new GFPack(f);
+                foreach (var bytes in pak.DecompressedFiles)
+                {
+                    if (AHTB.IsAHTB(bytes))
+                    {
+                        var tbl = new AHTB(bytes);
+                        var summaries = tbl.Summary;
+                        foreach (var t in tbl.ShortSummary)
+                            result.Add(t);
+                        list.Add(Path.GetFileName(f));
+                        list.AddRange(summaries);
+                    }
+                }
+            }
+
             var outname = GetPath("ahtb.txt");
             var outname2 = GetPath("ahtblist.txt");
             File.WriteAllLines(outname, result);
@@ -158,6 +177,10 @@ namespace pkNX.WinForms
             for (int i = 0; i < tr.Length; i++)
             {
                 var t = tr[i];
+
+                // some battles with Avery and Klara have out of bounds trclasses -- set back to "Pokémon Trainer"
+                if (t.Self.Class > trc.Length)
+                    t.Self.Class = 1;
 
                 result.Add($"{i:000} - {trc[t.Self.Class]}: {trn[i]}");
                 const int MoneyScalar = 80;
@@ -260,20 +283,28 @@ namespace pkNX.WinForms
 
         public void DumpGifts()
         {
-            var path = ROM.GetFile(GameFile.EncounterGift).FilePath;
-            var gifts = FlatBufferConverter.DeserializeFrom<EncounterGift8Archive>(path);
+            var speciesNames = ROM.GetStrings(TextName.SpeciesNames);
+            var data = ROM.GetFile(GameFile.EncounterGift)[0];
+            var gifts = FlatBufferConverter.DeserializeFrom<EncounterGift8Archive>(data);
             var table = TableUtil.GetTable(gifts.Table);
             var fn = GetPath("GiftEncounters.txt");
             File.WriteAllText(fn, table);
+
+            var f2 = GetPath("GiftEncountersPKHeX.txt");
+            File.WriteAllLines(f2, gifts.Table.Select(z => z.GetSummary(speciesNames)));
         }
 
         public void DumpStatic()
         {
-            var path = ROM.GetFile(GameFile.EncounterStatic).FilePath;
-            var gifts = FlatBufferConverter.DeserializeFrom<EncounterStatic8Archive>(path);
-            var table = TableUtil.GetTable(gifts.Table);
+            var speciesNames = ROM.GetStrings(TextName.SpeciesNames);
+            var data = ROM.GetFile(GameFile.EncounterStatic)[0];
+            var statics = FlatBufferConverter.DeserializeFrom<EncounterStatic8Archive>(data);
+            var table = TableUtil.GetTable(statics.Table);
             var fn = GetPath("StaticEncounters.txt");
             File.WriteAllText(fn, table);
+
+            var f2 = GetPath("StaticEncountersPKHeX.txt");
+            File.WriteAllLines(f2, statics.Table.Select(z => z.GetSummary(speciesNames)));
         }
 
         public void DumpWilds()
