@@ -16,6 +16,14 @@ namespace pkNX.Structures
             {
                 return x.FlawlessIVs < y.FlawlessIVs ? -1 : 1;
             }
+            else if (x.DropTableID != y.DropTableID)
+            {
+                return x.DropTableID < y.DropTableID ? -1 : 1;
+            }
+            else if (x.BonusTableID != y.BonusTableID)
+            {
+                return x.BonusTableID < y.BonusTableID ? -1 : 1;
+            }
             else
             {
                 int j;
@@ -283,7 +291,7 @@ namespace pkNX.Structures
             int i, j;
             for (i = 1; i < sortedEntries.Count; i++)
             {
-                if (sortedEntries[i].Species == sortedEntries[i - 1].Species && sortedEntries[i].AltForm == sortedEntries[i - 1].AltForm && sortedEntries[i].IsGigantamax == sortedEntries[i - 1].IsGigantamax && sortedEntries[i].FlawlessIVs == sortedEntries[i - 1].FlawlessIVs)
+                if (sortedEntries[i].Species == sortedEntries[i - 1].Species && sortedEntries[i].AltForm == sortedEntries[i - 1].AltForm && sortedEntries[i].IsGigantamax == sortedEntries[i - 1].IsGigantamax && sortedEntries[i].FlawlessIVs == sortedEntries[i - 1].FlawlessIVs && sortedEntries[i].DropTableID == sortedEntries[i - 1].DropTableID)
                 {
                     for (j = 0; j < 5; j++)
                     {
@@ -353,7 +361,7 @@ namespace pkNX.Structures
                 }
                 ret += $"{ability}|";
 
-                if (count == 0 || table[count - 1].FlawlessIVs != e.FlawlessIVs)
+                if (count == 0 || table[count - 1].FlawlessIVs != e.FlawlessIVs || table[count - 1].DropTableID != e.DropTableID || table[count - 1].BonusTableID != e.BonusTableID)
                 {
                     //yield return "\tBonus Drops:";
                     foreach (var entry in GetOrderedDrops(bonus_tables, e.BonusTableID, e.FlawlessIVs))
@@ -371,7 +379,7 @@ namespace pkNX.Structures
                     }
                     ret = ret.Substring(0, ret.Length - 4);
                     int j = 1;
-                    while (count + j < table.Length && table[count + j].FlawlessIVs == e.FlawlessIVs)
+                    while (count + j < table.Length && table[count + j].FlawlessIVs == e.FlawlessIVs && table[count + j].DropTableID == e.DropTableID && table[count + j].BonusTableID == e.BonusTableID)
                     {
                         j++;
                     }
